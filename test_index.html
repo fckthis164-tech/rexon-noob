@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #1abc9c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background-color: var(--primary);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 60px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .dashboard-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 15px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .transaction-item {
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .transaction-item.expense {
+            border-left-color: var(--danger);
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .stat-card.income {
+            background: linear-gradient(45deg, var(--success), #27ae60);
+        }
+        
+        .stat-card.expense {
+            background: linear-gradient(45deg, var(--danger), #c0392b);
+        }
+        
+        .stat-card.balance {
+            background: linear-gradient(45deg, var(--secondary), #2980b9);
+        }
+        
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .team-member {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding-top: 20px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Sidebar -->
+    <div class="sidebar col-lg-2 col-md-3 col-12">
+        <div class="d-flex justify-content-center mb-4">
+            <h2><i class="fas fa-money-bill-wave me-2"></i> ExpensePro</h2>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#"><i class="fas fa-home me-2"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-exchange-alt me-2"></i> Transactions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-chart-pie me-2"></i> Analytics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-filter me-2"></i> Filters</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-users me-2"></i> Team</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-cog me-2"></i> Settings</a>
+            </li>
+        </ul>
+        
+        <div class="mt-5">
+            <h5 class="px-3">Team Members</h5>
+            <div class="team-member">
+                <img src="https://ui-avatars.com/api/?name=You&background=0D8ABC&color=fff" class="user-avatar me-2">
+                <div>You (Admin)</div>
+            </div>
+            <div class="team-member">
+                <img src="https://ui-avatars.com/api/?name=Sarah&background=3498db&color=fff" class="user-avatar me-2">
+                <div>Sarah</div>
+            </div>
+            <div class="team-member">
+                <img src="https://ui-avatars.com/api/?name=John&background=2ecc71&color=fff" class="user-avatar me-2">
+                <div>John</div>
+            </div>
+            <div class="team-member">
+                <img src="https://ui-avatars.com/api/?name=Mike&background=e74c3c&color=fff" class="user-avatar me-2">
+                <div>Mike</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content col-lg-10 col-md-9 col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Expense Dashboard</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+                <i class="fas fa-plus me-2"></i>Add Transaction
+            </button>
+        </div>
+        
+        <!-- Stats Overview -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stat-card income">
+                    <h3><i class="fas fa-money-bill-wave me-2"></i> Income</h3>
+                    <h2>₹45,800</h2>
+                    <p>This Month</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card expense">
+                    <h3><i class="fas fa-credit-card me-2"></i> Expenses</h3>
+                    <h2>₹28,500</h2>
+                    <p>This Month</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card balance">
+                    <h3><i class="fas fa-wallet me-2"></i> Balance</h3>
+                    <h2>₹17,300</h2>
+                    <p>Current</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h4 class="mb-4"><i class="fas fa-filter me-2"></i>Filter Transactions</h4>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Amount</label>
+                    <select class="form-select" id="amountFilter">
+                        <option value="">All Amounts</option>
+                        <option value="2000">Above ₹2000</option>
+                        <option value="5000">Above ₹5000</option>
+                        <option value="10000">Above ₹10000</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">All Types</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" class="form-control" id="fromDate">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" class="form-control" id="toDate">
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary me-2"><i class="fas fa-sync-alt me-2"></i>Reset</button>
+                <button class="btn btn-primary"><i class="fas fa-search me-2"></i>Apply Filters</button>
+            </div>
+        </div>
+        
+        <!-- Analytics and Transactions -->
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="dashboard-card card">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title">Recent Transactions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="transaction-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5>Project Payment</h5>
+                                    <p class="text-muted">Received payment for website project</p>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="text-success">+₹25,000</h4>
+                                    <p class="text-muted">Today · You</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="transaction-item expense">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5>Office Rent</h5>
+                                    <p class="text-muted">Monthly office rent payment</p>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="text-danger">-₹15,000</h4>
+                                    <p class="text-muted">Yesterday · Sarah</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="transaction-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5>Freelance Work</h5>
+                                    <p class="text-muted">Logo design project</p>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="text-success">+₹8,500</h4>
+                                    <p class="text-muted">2 days ago · Mike</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="transaction-item expense">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5>Software Subscription</h5>
+                                    <p class="text-muted">Annual plan for design software</p>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="text-danger">-₹12,000</h4>
+                                    <p class="text-muted">3 days ago · John</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="dashboard-card card">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title">Expense Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="expenseChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Monthly Report -->
+        <div class="dashboard-card card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title">Monthly Income vs Expenses</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Transaction Modal -->
+    <div class="modal fade" id="addTransactionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Type</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" checked>
+                                    <label class="form-check-label" for="typeIncome">Income</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense">
+                                    <label class="form-check-label" for="typeExpense">Expense</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" class="form-control" placeholder="Enter amount">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" placeholder="Enter description">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select class="form-select">
+                                <option value="">Select Category</option>
+                                <option value="salary">Salary</option>
+                                <option value="freelance">Freelance Work</option>
+                                <option value="investment">Investment</option>
+                                <option value="rent">Rent</option>
+                                <option value="utilities">Utilities</option>
+                                <option value="software">Software</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Add Transaction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Expense Categories Chart
+            const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+            const expenseChart = new Chart(expenseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Rent', 'Software', 'Utilities', 'Supplies', 'Other'],
+                    datasets: [{
+                        data: [35, 25, 15, 10, 15],
+                        backgroundColor: [
+                            '#3498db',
+                            '#2ecc71',
+                            '#e74c3c',
+                            '#f39c12',
+                            '#9b59b6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Monthly Income vs Expenses Chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            const monthlyChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: [45000, 39000, 42000, 48000, 53000, 45800],
+                            backgroundColor: '#2ecc71'
+                        },
+                        {
+                            label: 'Expenses',
+                            data: [32000, 35000, 31000, 37000, 42000, 28500],
+                            backgroundColor: '#e74c3c'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Filter functionality
+            document.getElementById('amountFilter').addEventListener('change', function() {
+                // Filter logic would go here in a real application
+                console.log('Filtering by amount: ' + this.value);
+            });
+            
+            document.getElementById('typeFilter').addEventListener('change', function() {
+                // Filter logic would go here in a real application
+                console.log('Filtering by type: ' + this.value);
+            });
+        });
+    </script>
+</body>
+</html>
